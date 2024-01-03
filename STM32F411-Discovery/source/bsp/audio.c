@@ -86,10 +86,10 @@
 audio_config_t configs[] =
 {								
 #if SAMPLE_RESOLUTION == 16
-	{.N = 290, .R = 2, .DIV = 6, .ODD = 1, .MCKOE = 1, .bits = 16, .type = I2S_44_MCKOE_16, .fsr = 43569.0f},
+	{.N = 271, .R = 2, .DIV = 6, .ODD = 0, .MCKOE = 1, .bits = 32, .type = I2S_44_MCKOE_32, .fsr = 44108.0f},
 	{.N = 258, .R=  3, .DIV =` 3, .ODD = 0, .MCKOE = 1, .bits = 16, .type = I2S_48_MCKOE_16, .fsr = 47991.0f},
 #else
-	{.N = 290, .R = 2, .DIV = 6, .ODD = 0, .MCKOE = 1, .bits = 32, .type = I2S_44_MCKOE_32, .fsr = 43569.0f},
+	{.N = 271, .R = 2, .DIV = 6, .ODD = 0, .MCKOE = 1, .bits = 32, .type = I2S_44_MCKOE_32, .fsr = 44108.0f},
 	{.N = 258, .R=  3, .DIV = 3, .ODD = 1, .MCKOE = 1, .bits = 32, .type = I2S_48_MCKOE_32, .fsr = 47991.0f}				
 #endif	
 };
