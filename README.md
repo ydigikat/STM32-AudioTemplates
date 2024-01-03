@@ -27,3 +27,69 @@ Templates are available for the following boards:
 - (more coming soon)
 
 
+# Audio Modes
+All the templates work the same way, in fact most of the code is common to them all.  
+
+The first setting to be aware of is ```#define SAMPLE_RESOLUTION``` in the audio.h file which can be set to either 16 or 32 bit (actually 24 bit) resolution.  This sets buffer sizes and determines which audio modes you can then select for use.
+
+```C
+#define SAMPLE_RESOLUTION 16  
+//#define SAMPLE_RESOLUTION 32  
+
+```
+
+The audio modes are a set of enums also defined in audio.h, the available list is limited by the SAMPLE_RESOLUTION mode selected:
+
+```C
+/* Supported audio configurations */
+typedef enum
+{
+#if SAMPLE_RESOLUTION == 16	
+	I2S_44_16,
+	I2S_48_16,
+	I2S_44_MCKOE_16,
+	I2S_48_MCKOE_16,
+#else
+	I2S_44_32,
+	I2S_48_32,
+	I2S_44_MCKOE_32,
+	I2S_48_MCKOE_32,
+#endif	
+} audio_mode_t;
+```
+
+Use one of the available enums to configure the audio mode  ```main()```
+
+```C
+audio_config_t *pConfig = audio_streaming_run(audio_buffer, I2S_44_MCKOE_16);
+```
+
+# The Audio Configs LUT
+Rather than calculate the various prescalers each time, I prefer to pre-calculate them and use a lookup-table (LUT).
+
+These are what is read by ```audio_streaming_run()``` according to the mode you supplied.  The LUT contains all the modes supported by the device.
+
+```C
+
+*
+ * This is a LUT of the various config items for specific audio modes that we support.
+ */
+audio_config_t configs[] =
+		{
+#if SAMPLE_RESOLUTION == 16			
+				{.N = 302, .R = 2, .DIV = 53, .ODD = 1, .MCKOE = 0, .bits = 16, .type = I2S_44_16, .fsr = 44100.46875f},
+				{.N = 192, .R = 5, .DIV = 12, .ODD = 1, .MCKOE = 0, .bits = 16, .type = I2S_48_16, .fsr = 48000.0f},
+				{.N = 290, .R = 2, .DIV = 6, .ODD = 1, .MCKOE = 1, .bits = 16, .type = I2S_44_MCKOE_16, .fsr = 43569.0f},
+				{.N = 271, .R = 2, .DIV = 6, .ODD = 0, .MCKOE = 1, .bits = 16, .type = I2S_48_MCKOE_16, .fsr = 47991.07031},
+#else
+				{.N = 429, .R = 4, .DIV = 19, .ODD = 0, .MCKOE = 0, .bits = 32, .type = I2S_44_32, .fsr = 44099.50781f},
+				{.N = 384, .R = 5, .DIV = 12, .ODD = 1, .MCKOE = 0, .bits = 32, .type = I2S_48_32, .fsr = 48000.0f},
+				{.N = 290, .R = 2, .DIV = 6, .ODD = 1, .MCKOE = 1, .bits = 32, .type = I2S_44_MCKOE_32, .fsr = 43569.0f},
+				{.N = 258, .R = 3, .DIV = 3, .ODD = 1, .MCKOE = 1, .bits = 32, .type = I2S_48_MCKOE_32, .fsr = 47991.07031}
+#endif
+};
+```
+
+These settings should work for most Audio DACs.
+
+Note that the slight inaccuracies in the sample rate are caused by the limitations of scaling the PLL provided by the MCU.  Use the fsr from the table in any audio calculations to ensure that your outputs are correctly tuned.  They are generally accurate to within a fraction of a percent.
