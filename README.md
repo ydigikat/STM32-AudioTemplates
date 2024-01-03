@@ -26,6 +26,46 @@ Templates are available for the following boards:
 - STM32F411-Disco (STM32F411VET6)
 - (more coming soon)
 
+# CMake
+I'm not going to provide endless details on how to build the projects.  They all use CMake generating a build recipe for Ninja.  This choice is a result of my preferred IDE which is Visual Studio Code (VS Code).
+
+| File | Description |
+|------|-------------|
+| CMakeLists.txt| The project-level CMake definition file|
+| source/CMakeLists.txt | Application-level CMake definition file, this has the compiler flags etc|
+| cmake/stm_arm_gcc.cmake | STM GCC ARM Toolchain locations and flags | 
+| CMakePresets.json| CMake presets for "debug" and "release" |
+
+Run the CMake build command as usual from the command.  There is an option in the top-level CMakeLists.txt to enable flashing the device after a build. 
+
+CMake is configured to look for a specific build toolchain in the <b>cmake/stm_arm_gcc.cmake</b> file.  
+
+I use the STM patched version of the GCC ARM toolchain from the STMCubeCLT (command line tools) package.  You can get this from their website.  You can use other toolchains but will have to change paths in various places.
+
+
+# VS Code
+If you use VS Code then you can open an individual board folder (not the top-level folder) and use the VS Code CMake extension to configure and build the project.  
+
+- Ctrl+P - CMake:Configure
+- Ctrl+P - CMake:Build
+- Terminal->Run Task->Flash
+
+I've also included various VS Code specific .json files:
+
+| File | Description |
+|------|-------------|
+|extensions.json| Recommended extensions, this will offer to download if you don't have them. You will need at least the C/C++, Embedded and CMake extensions|
+|launch.json| A debugger launch configuration |
+|tasks.json| Build and flash tasks |
+
+
+# STM Low-Level Drivers & CMSIS
+
+The templates use CMSIS and the STM low-level drivers (stm_ll_xxxxx.h).  
+
+I do not use the STM HAL.  The LL drivers, which are stateless,  provide only a thin veneer over CMSIS but provide a little more legibility for understanding the code.
+
+There are places where I've reverted to using CMSIS and registers directly, this is usually where I cannot get the LL drivers to do what I want and don't have the time to figure out how to make them do so.
 
 # Audio Modes
 All the templates work the same way, in fact most of the code is common to them all.  
