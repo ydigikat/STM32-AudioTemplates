@@ -140,4 +140,6 @@ And that's pretty much all there is to it.
 
 This my DSO showing a 440Hz sine approximation on the Blackpill via a UDA1334A at 24bit/48 kHz.
 
-![Alt text](image.png)
+![Sine Scope Reading](sine.png)
+
+![I2S Logic Analyser Reading](i2s.png)
