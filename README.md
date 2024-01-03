@@ -23,11 +23,11 @@ For templates, I prefer to use copies of code rather than build libraries or use
 Templates are available for the following boards:
 
 - Generic "Blackpill" (STM32F411CEU6)
+- STM32F411-Disco (STM32F411VET6)
 - (more coming soon)
 
 
 # Audio Modes
-Each template supports audio at 44kHz and 48kHz, 16 or 24 bit resolution, with or without an I2S master clock.
 
 You select the audio mode as a parameter to the audio streaming init function:
 
@@ -35,27 +35,8 @@ You select the audio mode as a parameter to the audio streaming init function:
 	audio_config_t *pConfig = audio_streaming_run(audio_buffer, I2S_44_32);
 ```
 
-The full set of I2S configurations are:
-```c
-/*
- * From the reference table in the STM32F411 ref manual I2S section.
- *
- * This is a LUT of the various config items for specific audio modes that we support.
- */
-audio_config_t configs[] =
-		{
-				{.N = 302, .R = 2, .DIV = 53, .ODD = 1, .MCKOE = 0, .bits = 16, .type = I2S_44_16, .fsr = 44100.46875f},
-				{.N = 192, .R = 5, .DIV = 12, .ODD = 1, .MCKOE = 0, .bits = 16, .type = I2S_48_16, .fsr = 48000.0f},
-				{.N = 429, .R = 4, .DIV = 19, .ODD = 0, .MCKOE = 0, .bits = 32, .type = I2S_44_32, .fsr = 44099.50781f},
-				{.N = 384, .R = 5, .DIV = 12, .ODD = 1, .MCKOE = 0, .bits = 32, .type = I2S_48_32, .fsr = 48000.0f},
-				{.N = 271, .R = 2, .DIV = 6, .ODD = 0, .MCKOE = 1, .bits = 16, .type = I2S_44_MCKOE_16, .fsr = 44108.07422f},
-				{.N = 271, .R = 2, .DIV = 6, .ODD = 0, .MCKOE = 1, .bits = 16, .type = I2S_48_MCKOE_16, .fsr = 47991.07031},
-				{.N = 258, .R = 3, .DIV = 3, .ODD = 1, .MCKOE = 1, .bits = 32, .type = I2S_44_MCKOE_32, .fsr = 44108.07422f},
-				{.N = 258, .R = 3, .DIV = 3, .ODD = 1, .MCKOE = 1, .bits = 32, .type = I2S_48_MCKOE_32, .fsr = 47991.07031}};
+Note that the SAMPLES_RESOLUTION #define in audio.h determines which modes you can use.
 
-```
-
-Note that the inaccuracy on some of the sample rates is a limitation of the PLL configuration on th STM32F4.  It is inaudible to all intents and purposes.
 
 The ```main()``` loops forever checking buf_state to see if it needs to do anything. The DMA will set the buf_state flag to indicate which half of the audio buffer needs to be refreshed and your job is to do that part.
 

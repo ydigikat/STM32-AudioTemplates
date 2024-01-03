@@ -4,9 +4,9 @@
  * @brief Audio support
  * @version 0.1
  * @date 2023-12-31
- *
+ * 
  * @copyright Copyright (c) 2023
- *
+ * 
  */
 #ifndef HARDWARE_AUDIO_H_
 #define HARDWARE_AUDIO_H_
@@ -18,18 +18,17 @@
 #include "pins.h"
 #include "board.h"
 
+
 /* I2S/DMA configuration for this board */
-#define I2S_SPI (SPI2)
+#define I2S_SPI (SPI3)
 #define I2S_DMA (DMA1)
-#define I2S_DMA_STREAM (LL_DMA_STREAM_4)
-#define I2S_DMA_IRQ (DMA1_Stream4_IRQn)
+#define I2S_DMA_STREAM (LL_DMA_STREAM_5)
+#define I2S_DMA_IRQ (DMA1_Stream5_IRQn)
 #define I2S_DMA_CLK (LL_AHB1_GRP1_PERIPH_DMA1)
-#define I2S_SPI_CLK (LL_APB1_GRP1_PERIPH_SPI2)
+#define I2S_SPI_CLK (LL_APB1_GRP1_PERIPH_SPI3)
 
 /* We want a 1MHz VCO for the I2S PLL, the other dividers are mode specific (see the LUT in audio.c) */
-#define I2S_M (LL_RCC_PLLI2SM_DIV_25)
-
-/* NOTE: Buffer size is linked to the wordlength, you must change this if using 16 versus 32*/
+#define I2S_M (LL_RCC_PLLI2SM_DIV_8)
 
 #define SAMPLE_RESOLUTION 16  
 //#define SAMPLE_RESOLUTION 32  
@@ -44,15 +43,11 @@
 
 /* Supported audio configurations */
 typedef enum
-{
-#if SAMPLE_RESOLUTION == 16	
-	I2S_44_16,
-	I2S_48_16,
+{	
+#if SAMPLE_RESOLUTION == 16
 	I2S_44_MCKOE_16,
 	I2S_48_MCKOE_16,
-#else
-	I2S_44_32,
-	I2S_48_32,
+#else	
 	I2S_44_MCKOE_32,
 	I2S_48_MCKOE_32,
 #endif	
@@ -69,7 +64,6 @@ typedef struct
 	uint8_t bits;
 	float fsr;
 } audio_config_t;
-
 
 
 audio_config_t *audio_streaming_run(int16_t sample_buffer[], audio_mode_t audio_config_type);

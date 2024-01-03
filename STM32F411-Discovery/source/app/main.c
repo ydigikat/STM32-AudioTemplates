@@ -27,7 +27,7 @@ volatile static uint8_t buf_state = REFILL_DONE;
 static float acc = 0.5f;
 static float sample_buffer[SAMPLE_BLOCK_SIZE];
 
-static void GenerateSaw(float inc)
+void GenerateSaw(float inc)
 {
 	for (int i = 0; i < SAMPLE_BLOCK_SIZE; i++)
 	{
@@ -48,7 +48,7 @@ const float P = 0.225f;
 
 #include <math.h>
 
-static void GenerateSineApproximation(float inc)
+void GenerateSineApproximation(float inc)
 {
 	for (int i = 0; i < SAMPLE_BLOCK_SIZE; i++)
 	{
@@ -74,21 +74,21 @@ int main(void)
 	audio_config_t *pConfig = audio_streaming_run(audio_buffer, I2S_44_MCKOE_16);
 
 	/* Signal that all is well post configuration */
-	LED_ON();
+	LED_BLUE_ON();
 
 	while (1)
 	{
 		if (buf_state != REFILL_DONE)
 		{
-			PROBE1_SET();
 
-			// GenerateSaw(TEST_TONE / pConfig->fsr);
-			GenerateSineApproximation(TEST_TONE / pConfig->fsr);
+			//GenerateSaw(TEST_TONE / pConfig->fsr);
+			GenerateSineApproximation(TEST_TONE/pConfig->fsr);
+			
 
+			/* Determine buffer half to refill */
 			int16_t *ptr =
 					buf_state == REFILL_PING ? audio_buffer : audio_buffer + AUDIO_BUF_SGL;
 
-			/* Determine buffer half to refill */
 			if (pConfig->bits == 16)
 			{
 				for (int i = 0; i < SAMPLE_BLOCK_SIZE; i++)
@@ -114,32 +114,25 @@ int main(void)
 				}
 			}
 			buf_state = REFILL_DONE;
-
-			PROBE1_CLEAR();
 		}
 	}
 }
 
 /* -------------------------------------------------------------------
- * DMA1_4 interrupts for I2S2 TX (SPI2) transfers
+ * DMA1 interrupt for audio buffering (I2S)
  */
-void DMA1_Stream4_IRQHandler(void)
-{
-	if (LL_DMA_IsActiveFlag_TC4(I2S_DMA) == 1)
+void DMA1_Stream5_IRQHandler(void)
+{	
+	/* TX complete - refill PONG */
+	if (I2S_DMA->HISR & DMA_HISR_TCIF5)
 	{
-		/* Complete */
-		LL_DMA_ClearFlag_TC4(I2S_DMA);
+		I2S_DMA->HIFCR = DMA_HIFCR_CTCIF5;
 		buf_state = REFILL_PONG;
 	}
-	else if (LL_DMA_IsActiveFlag_HT4(I2S_DMA) == 1)
+	else
 	{
-		/* Half complete */
-		LL_DMA_ClearFlag_HT4(I2S_DMA);
+		/* Half done - refill ping */
+		I2S_DMA->HIFCR = DMA_HIFCR_CHTIF5;
 		buf_state = REFILL_PING;
-	}
-	else if (LL_DMA_IsActiveFlag_TE4(I2S_DMA) == 1)
-	{
-		/* Oopsie */
-		LL_DMA_ClearFlag_TE4(I2S_DMA);
 	}
 }

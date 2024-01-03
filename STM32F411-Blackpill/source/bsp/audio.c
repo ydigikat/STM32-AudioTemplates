@@ -11,20 +11,22 @@
 #include "audio.h"
 
 /*
- * From the reference table in the STM32F411 ref manual I2S section.
- *
  * This is a LUT of the various config items for specific audio modes that we support.
  */
 audio_config_t configs[] =
 		{
+#if SAMPLE_RESOLUTION == 16			
 				{.N = 302, .R = 2, .DIV = 53, .ODD = 1, .MCKOE = 0, .bits = 16, .type = I2S_44_16, .fsr = 44100.46875f},
 				{.N = 192, .R = 5, .DIV = 12, .ODD = 1, .MCKOE = 0, .bits = 16, .type = I2S_48_16, .fsr = 48000.0f},
+				{.N = 290, .R = 2, .DIV = 6, .ODD = 1, .MCKOE = 1, .bits = 16, .type = I2S_44_MCKOE_16, .fsr = 43569.0f},
+				{.N = 271, .R = 2, .DIV = 6, .ODD = 0, .MCKOE = 1, .bits = 16, .type = I2S_48_MCKOE_16, .fsr = 47991.07031},
+#else
 				{.N = 429, .R = 4, .DIV = 19, .ODD = 0, .MCKOE = 0, .bits = 32, .type = I2S_44_32, .fsr = 44099.50781f},
 				{.N = 384, .R = 5, .DIV = 12, .ODD = 1, .MCKOE = 0, .bits = 32, .type = I2S_48_32, .fsr = 48000.0f},
-				{.N = 271, .R = 2, .DIV = 6, .ODD = 0, .MCKOE = 1, .bits = 16, .type = I2S_44_MCKOE_16, .fsr = 44108.07422f},
-				{.N = 271, .R = 2, .DIV = 6, .ODD = 0, .MCKOE = 1, .bits = 16, .type = I2S_48_MCKOE_16, .fsr = 47991.07031},
-				{.N = 258, .R = 3, .DIV = 3, .ODD = 1, .MCKOE = 1, .bits = 32, .type = I2S_44_MCKOE_32, .fsr = 44108.07422f},
-				{.N = 258, .R = 3, .DIV = 3, .ODD = 1, .MCKOE = 1, .bits = 32, .type = I2S_48_MCKOE_32, .fsr = 47991.07031}};
+				{.N = 290, .R = 2, .DIV = 6, .ODD = 1, .MCKOE = 1, .bits = 32, .type = I2S_44_MCKOE_32, .fsr = 43569.0f},
+				{.N = 258, .R = 3, .DIV = 3, .ODD = 1, .MCKOE = 1, .bits = 32, .type = I2S_48_MCKOE_32, .fsr = 47991.07031}
+#endif
+};
 
 /**
  * @brief Enables I2S audio stream using DMA circular buffering.
@@ -74,7 +76,8 @@ audio_config_t *audio_streaming_run(int16_t audio_buffer[], audio_mode_t audio_m
 
 
 	/* I2S configuration for requested mode */	
-	LL_I2S_SetDataFormat(I2S_SPI, config->bits == 16 ? LL_I2S_DATAFORMAT_16B_EXTENDED : LL_I2S_DATAFORMAT_24B);
+	LL_I2S_SetDataFormat(I2S_SPI, config->bits == 16 ? LL_I2S_DATAFORMAT_16B : LL_I2S_DATAFORMAT_24B);
+
 	config->MCKOE ? LL_I2S_EnableMasterClock(I2S_SPI) : LL_I2S_DisableMasterClock(I2S_SPI);
 	LL_I2S_SetPrescalerLinear(I2S_SPI, config->DIV);
 	LL_I2S_SetPrescalerParity(I2S_SPI, config->ODD ? LL_I2S_PRESCALER_PARITY_ODD : LL_I2S_PRESCALER_PARITY_EVEN);
@@ -85,7 +88,7 @@ audio_config_t *audio_streaming_run(int16_t audio_buffer[], audio_mode_t audio_m
 	LL_DMA_ConfigAddresses(I2S_DMA, I2S_DMA_STREAM, (uint32_t)audio_buffer, LL_SPI_DMA_GetRegAddr(I2S_SPI), LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
 
 	/* DMA transfer length */
-	LL_DMA_SetDataLength(I2S_DMA, I2S_DMA_STREAM, AUDIO_BUF_DBL);
+	LL_DMA_SetDataLength(I2S_DMA, I2S_DMA_STREAM,AUDIO_BUF_DBL);
 
 	/* DMA controller configuration */
 	LL_DMA_ConfigTransfer(I2S_DMA, I2S_DMA_STREAM,
