@@ -71,7 +71,7 @@ static void GenerateSineApproximation(float inc)
 int main(void)
 {
 
-	audio_config_t *pConfig = audio_streaming_run(audio_buffer, I2S_44_MCKOE_16);
+	audio_config_t *pConfig = audio_streaming_run(audio_buffer, I2S_48_MCKOE_32);
 
 	/* Signal that all is well post configuration */
 	LED_ON();

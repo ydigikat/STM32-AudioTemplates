@@ -31,8 +31,8 @@
 
 /* NOTE: Buffer size is linked to the wordlength, you must change this if using 16 versus 32*/
 
-#define SAMPLE_RESOLUTION 16  
-//#define SAMPLE_RESOLUTION 32  
+//#define SAMPLE_RESOLUTION 16  
+#define SAMPLE_RESOLUTION 32  
 
 #define SAMPLE_BLOCK_SIZE 128								/* 128 float samples */
 #if SAMPLE_RESOLUTION == 32

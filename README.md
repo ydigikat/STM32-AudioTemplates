@@ -137,3 +137,7 @@ For most synthesisers I use this bare-metal super-loop approach as, other than M
 
 # Thats it.
 And that's pretty much all there is to it.  
+
+This my DSO showing a 440Hz sine approximation on the Blackpill via a UDA1334A at 24bit/48 kHz.
+
+![Alt text](image.png)
