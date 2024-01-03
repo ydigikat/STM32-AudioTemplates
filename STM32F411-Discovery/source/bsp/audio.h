@@ -30,8 +30,8 @@
 /* We want a 1MHz VCO for the I2S PLL, the other dividers are mode specific (see the LUT in audio.c) */
 #define I2S_M (LL_RCC_PLLI2SM_DIV_8)
 
-#define SAMPLE_RESOLUTION 16  
-//#define SAMPLE_RESOLUTION 32  
+//#define SAMPLE_RESOLUTION 16  
+#define SAMPLE_RESOLUTION 32  
 
 #define SAMPLE_BLOCK_SIZE 128								/* 128 float samples */
 #if SAMPLE_RESOLUTION == 32
