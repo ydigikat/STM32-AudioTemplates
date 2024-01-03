@@ -93,3 +93,47 @@ audio_config_t configs[] =
 These settings should work for most Audio DACs.
 
 Note that the slight inaccuracies in the sample rate are caused by the limitations of scaling the PLL provided by the MCU.  Use the fsr from the table in any audio calculations to ensure that your outputs are correctly tuned.  They are generally accurate to within a fraction of a percent.
+
+# DMA
+Data is transferred from Memory to I2S using a circular (continous) DMA mechanism. 
+
+The DMA will signal each time it has cleared half the the audio buffer with an interrupt.  One at half-complete, the other at fully complete.  You need to ensure that the half of the buffer that was just read is refreshed before DMA circles around to read it again.
+
+The example ```main()``` has a loop which shows this approach.  The loop runs continously but looks out for a flag being set by the interrupt which indicates that one or other of the buffer halfs (PING and PONG in this case) need to be filled.  
+
+The template includes a couple of test audio generators (saw and sine approximation) and the example code to fill the buffer.  Essentially you should be able to compile the template and immediately hear a 440Hz tone if all is setup correctly.
+
+While not servicing the interrupt ```main()``` could, of course, be doing other things.
+
+```C
+
+while (1)
+{
+    if (buf_state != REFILL_DONE)
+    {        
+        int16_t *ptr =
+                buf_state == REFILL_PING ? 
+                    audio_buffer : 
+                    audio_buffer + AUDIO_BUF_SGL;
+
+        /* refill the buffer pointed to by ptr */
+        <snip>
+
+        /* Signal we're done */
+        buf_state = REFILL_DONE
+    }
+    else
+    {
+        /* No refill required, do other stuff here */
+        <snip>
+    }
+}
+
+```
+
+If you are using an RTOS then you'll likely move this code into a task.  
+
+For most synthesisers I use this bare-metal super-loop approach as, other than MIDI processing, I rarely want the code to be doing anything other than processing audio.  I don't usually have a UI preferring to use MIDI to control all the parameters.
+
+# Thats it.
+And that's pretty much all there is to it.  
